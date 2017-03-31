@@ -43,12 +43,17 @@ if __name__ == '__main__':
         print("Fatal error upon attempt to authenticate. Dropping to shell")
         print(repr(e))
 
-    while True:
-        input("Press enter to attempt session refresh")
+    input("Press enter to attempt session refresh")
 
-        # Testing refresh
-        try:
-            access_key, refresh_key = session.renew_token(CLIENT_ID, CLIENT_SECRET)
-            logging.info("Successfully refreshed.\n Primary key: {0}, refresh key: {1}".format(access_key, refresh_key))
-        except HTTPError as e:     # TO BE REFINED
-            print(repr(e))
+    # Testing refresh
+    # try:
+    #     access_key, refresh_key = session.renew_token(CLIENT_ID, CLIENT_SECRET)
+    #     logging.info("Successfully refreshed.\n Primary key: {0}, refresh key: {1}".format(access_key, refresh_key))
+    # except HTTPError as e:     # TO BE REFINED
+    #     print(repr(e))
+
+    # Get list of contact lists
+    list_dict = session.get_list(access_key)
+    import code
+    code.interact(local=locals())
+

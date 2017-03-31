@@ -61,8 +61,16 @@ class ActonSession:
         else:
             r.raise_for_status()
 
-    def get_list(self):
-        pass
+    # Gets list of lists
+    def get_list(self, access_key, listing_type="CONTACT_LIST"):
+        path = '/api/1'
+        url = urljoin(self.HOST, path)
+        headers = {'Cache-Control': 'no-cache'}
+
+        payload = {'listingtype': listing_type}
+
+        response = requests.get(url, headers=headers, params=payload)
+        return response.json()
 
     def __init__(self):
         # Define global variables of host, access token and refresh token
