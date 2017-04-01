@@ -1,7 +1,10 @@
 import logging
 import json
+from requests.compat import urljoin
 from requests.exceptions import HTTPError
 from actonsession import ActonSession
+from oauthlib.oauth2 import LegacyApplicationClient
+from requests_oauthlib import OAuth2Session
 
 
 if __name__ == '__main__':
@@ -21,6 +24,8 @@ if __name__ == '__main__':
         CLIENT_ID = credentials['client-id']
         CLIENT_SECRET = credentials['client-secret']
 
+    HOST = 'https://restapi.actonsoftware.com'
+
     if usr_in == "2":
         username = input("Please enter Act-On username")
         password = input("Please enter Act-On password")
@@ -32,16 +37,13 @@ if __name__ == '__main__':
         username = credentials["sandbox-UID"]
         password = 'welcome'
 
-    # Create session manager instance
-    session = ActonSession()
-
     # Testing authorization
-    try:
-        access_key, refresh_key = session.authenticate(username, password, CLIENT_ID, CLIENT_SECRET)
-        logging.info("Successfully authenticated.\n Primary key: {0}, refresh key: {1}".format(access_key, refresh_key))
-    except HTTPError as e:
-        print("Fatal error upon attempt to authenticate. Dropping to shell")
-        print(repr(e))
+    path = '/token'
+    url = urljoin(HOST, path)
+    session = OAuth2Session(client=LegacyApplicationClient(client_id=CLIENT_ID))
+    token = session.fetch_token(token_url=url, username=username, password=password,
+                                client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
+    logging.info("Token %s obtained." % token)
 
     input("Press enter to attempt session refresh")
 
@@ -51,9 +53,3 @@ if __name__ == '__main__':
     #     logging.info("Successfully refreshed.\n Primary key: {0}, refresh key: {1}".format(access_key, refresh_key))
     # except HTTPError as e:     # TO BE REFINED
     #     print(repr(e))
-
-    # Get list of contact lists
-    list_dict = session.get_list(access_key)
-    import code
-    code.interact(local=locals())
-
