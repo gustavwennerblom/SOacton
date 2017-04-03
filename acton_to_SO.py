@@ -40,8 +40,8 @@ if __name__ == '__main__':
     # Testing authorization
     path = '/token'
     url = urljoin(HOST, path)
-    session = OAuth2Session(client=LegacyApplicationClient(client_id=CLIENT_ID))
-    token = session.fetch_token(token_url=url, username=username, password=password,
+    oauth = OAuth2Session(client=LegacyApplicationClient(client_id=CLIENT_ID))
+    token = oauth.fetch_token(token_url=url, username=username, password=password,
                                 client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
     logging.info("Token %s obtained." % token)
 
