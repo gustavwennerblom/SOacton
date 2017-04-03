@@ -55,7 +55,7 @@ if __name__ == '__main__':
     input("Press enter to attempt getting a contact list")
 
     # Get list of contact lists
-    list_dict = session.get_list(access_key)
+    list_dict = session.get_list()
     import code
     code.interact(local=locals())
 

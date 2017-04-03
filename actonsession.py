@@ -2,7 +2,7 @@ import html
 import logging
 import requests
 from requests.compat import urljoin
-
+import DBmanager
 
 class ActonSession:
 
@@ -32,6 +32,7 @@ class ActonSession:
             response = r.json()
             self.ACCESS_TOKEN = response['access_token']
             self.REFRESH_TOKEN = response['refresh_token']
+            self.db.insert_tokens(self.ACCESS_TOKEN, self.REFRESH_TOKEN)
             return response['access_token'], response['refresh_token']
         else:
             r.raise_for_status()
@@ -62,10 +63,10 @@ class ActonSession:
             r.raise_for_status()
 
     # Gets list of lists
-    def get_list(self, access_key, listing_type="CONTACT_LIST"):
+    def get_list(self, listing_type="CONTACT_LIST"):
         path = '/api/1/list'
         url = urljoin(self.HOST, path)
-        auth = 'Bearer '+self.ACCESS_TOKEN
+        auth = 'Bearer '+ self.ACCESS_TOKEN
         headers = {'Cache-Control': 'no-cache', 'Authorization': auth}
 
         payload = {'listingtype': listing_type}
@@ -80,3 +81,5 @@ class ActonSession:
         self.REFRESH_TOKEN = ''
         self.CLIENT_ID = ''
         self.CLIENT_SECRET = ''
+        self.db = DBmanager.DBmanager()
+        self.keyring = DBmanager.ActonKeyRing()
