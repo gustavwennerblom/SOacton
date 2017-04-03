@@ -63,9 +63,10 @@ class ActonSession:
 
     # Gets list of lists
     def get_list(self, access_key, listing_type="CONTACT_LIST"):
-        path = '/api/1'
+        path = '/api/1/list'
         url = urljoin(self.HOST, path)
-        headers = {'Cache-Control': 'no-cache'}
+        auth = 'Bearer '+self.ACCESS_TOKEN
+        headers = {'Cache-Control': 'no-cache', 'Authorization': auth}
 
         payload = {'listingtype': listing_type}
 

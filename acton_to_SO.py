@@ -7,7 +7,7 @@ from actonsession import ActonSession
 if __name__ == '__main__':
     # Create logging instance
     FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(filename="SOacton.log", format=FORMAT, level=logging.INFO)
+    logging.basicConfig(filename="SOacton.log", format=FORMAT, level=logging.DEBUG)
 
     # Temporary sandbox option exposure
     usr_in = input("Menu \n"
@@ -46,11 +46,13 @@ if __name__ == '__main__':
     input("Press enter to attempt session refresh")
 
     # Testing refresh
-    # try:
-    #     access_key, refresh_key = session.renew_token(CLIENT_ID, CLIENT_SECRET)
-    #     logging.info("Successfully refreshed.\n Primary key: {0}, refresh key: {1}".format(access_key, refresh_key))
-    # except HTTPError as e:     # TO BE REFINED
-    #     print(repr(e))
+    try:
+        access_key, refresh_key = session.renew_token(CLIENT_ID, CLIENT_SECRET)
+        logging.info("Successfully refreshed.\n Primary key: {0}, refresh key: {1}".format(access_key, refresh_key))
+    except HTTPError as e:     # TO BE REFINED
+        print(repr(e))
+
+    input("Press enter to attempt getting a contact list")
 
     # Get list of contact lists
     list_dict = session.get_list(access_key)
