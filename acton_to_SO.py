@@ -10,7 +10,7 @@ from requests_oauthlib import OAuth2Session
 if __name__ == '__main__':
     # Create logging instance
     FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(filename="SOacton.log", format=FORMAT, level=logging.INFO)
+    logging.basicConfig(filename="SOacton.log", format=FORMAT, level=logging.DEBUG)
 
     # Temporary sandbox option exposure
     usr_in = input("Menu \n"
@@ -41,7 +41,8 @@ if __name__ == '__main__':
     path = '/token'
     url = urljoin(HOST, path)
     oauth = OAuth2Session(client=LegacyApplicationClient(client_id=CLIENT_ID))
-    token = oauth.fetch_token(token_url=url, username=username, password=password,
+    headers = {'cache-control': 'no-cache', 'content-type': 'application/x-www-form-urlencoded'}
+    token = oauth.fetch_token(token_url=url, username=username, password=password, headers=headers,
                                 client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
     logging.info("Token %s obtained." % token)
 
