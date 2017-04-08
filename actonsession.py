@@ -2,7 +2,9 @@ import html
 import logging
 import requests
 from requests.compat import urljoin
+import time
 import DBmanager
+
 
 class ActonSession:
 
@@ -66,7 +68,7 @@ class ActonSession:
     def get_list(self, listing_type="CONTACT_LIST"):
         path = '/api/1/list'
         url = urljoin(self.HOST, path)
-        auth = 'Bearer '+ self.ACCESS_TOKEN
+        auth = 'Bearer ' + self.ACCESS_TOKEN
         headers = {'Cache-Control': 'no-cache', 'Authorization': auth}
 
         payload = {'listingtype': listing_type}
