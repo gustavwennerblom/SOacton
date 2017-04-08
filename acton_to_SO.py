@@ -4,6 +4,7 @@ from requests.exceptions import HTTPError
 from actonsession import ActonSession
 
 
+
 def validate_intention(message):
     usr_in = input(message + " Continue? (Y/N)")
     if usr_in.upper() == "Y":
@@ -47,12 +48,7 @@ def test_getlists(session):
     else:
         return None
 
-if __name__ == '__main__':
-    # Create logging instance
-    FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(filename="SOacton.log", format=FORMAT, level=logging.DEBUG)
-    logging.info("Logger enabled")
-
+def main():
     # Temporary sandbox option exposure
     usr_in = input("Menu \n"
                    "(1) Work with sandbox\n"
@@ -89,4 +85,13 @@ if __name__ == '__main__':
     # Drop to shell to interact with test methods
     import code
     code.interact(local=locals())
+
+
+if __name__ == '__main__':
+    # Create logging instance
+    FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    logging.basicConfig(filename="SOacton2.log", level=logging.DEBUG)
+    logging.info("Logger enabled")
+
+    main()
 
