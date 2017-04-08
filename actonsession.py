@@ -2,7 +2,7 @@ import html
 import logging
 import requests
 from requests.compat import urljoin
-import time
+import datetime
 import DBmanager
 
 
@@ -32,10 +32,10 @@ class ActonSession:
         # Check that no error has been raised from the request
         if not r.raise_for_status():
             response = r.json()
-            self.ACCESS_TOKEN = response['access_token']
-            self.REFRESH_TOKEN = response['refresh_token']
-            self.db.insert_tokens(self.ACCESS_TOKEN, self.REFRESH_TOKEN)
-            return response['access_token'], response['refresh_token']
+            access_token = response['access_token']
+            refresh_token = response['refresh_token']
+            self.db.insert_tokens(access_token, refresh_token)
+            return access_token, refresh_token
         else:
             r.raise_for_status()
 
@@ -47,20 +47,20 @@ class ActonSession:
                    }
 
         payload = {'grant_type': 'refresh_token',
-                   'refresh_token': self.REFRESH_TOKEN,
+                   'refresh_token': self.db.get_refresh_token(),
                    'client_id': client_id,
                    'client_secret': client_secret
                    }
 
         r = requests.post(url, headers=headers, params=payload)
-        # print("Request: {}".format(r.text))
 
         if not r.raise_for_status():
             response = r.json()
             # print("Response: {}".format(response))
-            self.ACCESS_TOKEN = response['access_token']
-            self.REFRESH_TOKEN = response['refresh_token']
-            return self.ACCESS_TOKEN, self.REFRESH_TOKEN
+            access_token = response['access_token']
+            refresh_token = response['refresh_token']
+            self.db.insert_tokens(access_token, refresh_token)
+            return access_token, refresh_token
         else:
             r.raise_for_status()
 
@@ -69,6 +69,10 @@ class ActonSession:
     # response["result"] is a list
     # resonse["result"][0] is a dict with a key "name" holding the name of the list
     def get_lists(self, listing_type="CONTACT_LIST"):
+
+        # Check if token has expired and renew it if required
+        if not self.token_valid():
+            self.renew_token(self.CLIENT_ID, self.CLIENT_SECRET)
 
         path = '/api/1/list'
         url = urljoin(self.HOST, path)
@@ -81,12 +85,22 @@ class ActonSession:
         response = requests.get(url, headers=headers, params=payload)
         return response.json()
 
-    def __init__(self):
+    def token_valid(self):
+        current_key_timestamp = self.db.get_key_timestamp()  # returns a datetime object
+        lifetime = datetime.datetime.now() - current_key_timestamp
+        if lifetime.seconds > self.LEASE_TIME:
+            logging.info("Current access key in use for {0} seconds. Max lease time is {1}. OK to proceed with it"
+                         .format(lifetime.seconds, self.LEASE_TIME))
+            return True
+        else:
+            logging.info("Current access key has expired (in use since {0} seconds, max lease time is {1} seconds)."
+                         "Suggesting to renew".format(lifetime.seconds, self.LEASE_TIME))
+            return False
+
+    def __init__(self, client_id, client_secret):
         # Define global variables of host, access token and refresh token
         self.HOST = 'https://restapi.actonsoftware.com'
-        self.ACCESS_TOKEN = ''
-        self.REFRESH_TOKEN = ''
-        self.CLIENT_ID = ''
-        self.CLIENT_SECRET = ''
+        self.CLIENT_ID = client_id
+        self.CLIENT_SECRET = client_secret
         self.db = DBmanager.DBmanager()
         self.LEASE_TIME = 3600  # key lease time in seconds

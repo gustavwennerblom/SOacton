@@ -6,6 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+
 class ActonKeyRing(Base):
     __tablename__ = 'actonsession'
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
@@ -13,8 +14,9 @@ class ActonKeyRing(Base):
     refresh_token = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     lease_start = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
 
-    def get_token(self):
+    logging.info("Table created in database for storage of keys")
 
+    def get_token(self):
         return self.access_token
 
 
@@ -24,10 +26,9 @@ class DBmanager:
         self.engine = sqlalchemy.create_engine('sqlite:///actonsession.db')
         # Create table
         Base.metadata.create_all(self.engine)
-        # Base.metadata.bind(self.engine)
         db_session = sqlalchemy.orm.sessionmaker(bind=self.engine)
         self.session = db_session()
-        # self.keyring = ActonKeyRing()
+        logging.info("Database session established")
 
     def insert_tokens(self, access_token, refresh_token):
         new_tokens = ActonKeyRing(
@@ -37,11 +38,20 @@ class DBmanager:
         )
         self.session.add(new_tokens)
         self.session.commit()
+        logging.info("New set of tokens inserted into keyring in database")
 
     def get_token(self):
         result = self.session.query(ActonKeyRing).all()
-        token = result[0].access_token
-        print("Current token is: {}".format(token))
-        return token
+        latest_token = result[-1].access_token
+        print("Current token is: {}".format(latest_token))
+        return latest_token
 
+    def get_refresh_token(self):
+        result = self.session.query(ActonKeyRing).all()
+        latest_refresh_token = result[-1].refresh_token
+        return latest_refresh_token
+
+    def get_key_timestamp(self):
+        result = self.session.query(ActonKeyRing).all()
+        return result[-1].lease_start
 

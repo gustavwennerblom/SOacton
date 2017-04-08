@@ -51,6 +51,7 @@ if __name__ == '__main__':
     # Create logging instance
     FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(filename="SOacton.log", format=FORMAT, level=logging.DEBUG)
+    logging.info("Logger enabled")
 
     # Temporary sandbox option exposure
     usr_in = input("Menu \n"
@@ -58,15 +59,17 @@ if __name__ == '__main__':
                    "(2) Work with live account\n"
                    ">>")
 
-    # Read credentials (only used if working with production environment"
+    # Read credentials
     with open("CREDENTIALS.json") as f:
         credentials = json.loads(f.readline())
         CLIENT_ID = credentials['client-id']
         CLIENT_SECRET = credentials['client-secret']
 
+    # Take username and password from stdin if opting to use live environment
     if usr_in == "2":
         username = input("Please enter Act-On username")
         password = input("Please enter Act-On password")
+    # Fast route if using sandbox
     elif usr_in == "1":
         username = credentials["sandbox-UID"]
         password = 'welcome'
@@ -75,8 +78,8 @@ if __name__ == '__main__':
         username = credentials["sandbox-UID"]
         password = 'welcome'
 
-    # Create session manager instance
-    session = ActonSession()
+    # Create session manager instance aware of CLIENT_ID and CLIENT_SECRET
+    session = ActonSession(CLIENT_ID, CLIENT_SECRET)
 
     print("Methods available:"
           "\n\t test_authenticate (takes 'session' in, returns keys)"
