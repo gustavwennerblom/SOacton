@@ -6,13 +6,16 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
-
 class ActonKeyRing(Base):
     __tablename__ = 'actonsession'
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
     access_token = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     refresh_token = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     lease_start = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
+
+    def get_token(self):
+
+        return self.access_token
 
 
 class DBmanager:
@@ -24,6 +27,7 @@ class DBmanager:
         # Base.metadata.bind(self.engine)
         db_session = sqlalchemy.orm.sessionmaker(bind=self.engine)
         self.session = db_session()
+        # self.keyring = ActonKeyRing()
 
     def insert_tokens(self, access_token, refresh_token):
         new_tokens = ActonKeyRing(
@@ -34,5 +38,10 @@ class DBmanager:
         self.session.add(new_tokens)
         self.session.commit()
 
-    def retrieve_tokens(self):
-        pass
+    def get_token(self):
+        result = self.session.query(ActonKeyRing).all()
+        token = result[0].access_token
+        print("Current token is: {}".format(token))
+        return token
+
+

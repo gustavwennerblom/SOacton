@@ -65,10 +65,15 @@ class ActonSession:
             r.raise_for_status()
 
     # Gets list of lists
-    def get_list(self, listing_type="CONTACT_LIST"):
+    # Returns a dict with keys "result", "count" (length), "totalCount", and "offset"
+    # response["result"] is a list
+    # resonse["result"][0] is a dict with a key "name" holding the name of the list
+    def get_lists(self, listing_type="CONTACT_LIST"):
+
         path = '/api/1/list'
         url = urljoin(self.HOST, path)
-        auth = 'Bearer ' + self.ACCESS_TOKEN
+        token = self.db.get_token()
+        auth = 'Bearer ' + token
         headers = {'Cache-Control': 'no-cache', 'Authorization': auth}
 
         payload = {'listingtype': listing_type}
@@ -84,4 +89,4 @@ class ActonSession:
         self.CLIENT_ID = ''
         self.CLIENT_SECRET = ''
         self.db = DBmanager.DBmanager()
-        self.keyring = DBmanager.ActonKeyRing()
+        self.LEASE_TIME = 3600  # key lease time in seconds

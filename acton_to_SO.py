@@ -42,7 +42,7 @@ def test_refresh(session):
 
 def test_getlists(session):
     if validate_intention("This returns a dict of contact lists in account."):
-        list_dict = session.get_list()
+        list_dict = session.get_lists()
         return list_dict
     else:
         return None
