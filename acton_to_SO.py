@@ -8,6 +8,7 @@ from actonsession import ActonSession
 FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(filename="SOacton.log", format=FORMAT, level=logging.DEBUG)
 
+
 def validate_intention(message):
     usr_in = input(message + " Continue? (Y/N)")
     if usr_in.upper() == "Y":
@@ -48,12 +49,13 @@ def test_refresh(session):
 def test_getlists(session):
     if validate_intention("This returns a dict of contact lists in account."):
         list_dict = session.get_lists()
-        print ("Successful - lists returned (hope you caught it...")
+        logging.info("Successful - lists returned (hope you caught it...)")
         return list_dict
     else:
         return None
 
-def test_get_list_by_name(session, list_name):
+
+def test_glbn(session, list_name):
     if validate_intention("This returns a contact list represented as a dict"):
         try:
             list_dict = session.get_list_by_name(list_name)
@@ -63,6 +65,73 @@ def test_get_list_by_name(session, list_name):
             print('!!!! ' + repr(e))
     else:
         return None
+
+
+def test_get_core_data(session, list_name):
+    if not validate_intention("This prints core contact list data to stdout"):
+        return None
+
+    contacts = test_glbn(session, list_name)
+
+    # Build dict with index of targetted headers
+    target_headers = ["E-mail Address",
+                      "First Name",
+                      "Last Name",
+                      "Company",
+                      "Act-On score"]
+    indices = {}
+    for header in contacts["headers"]:
+        if header in target_headers:
+            indices[header] = contacts["headers"].index(header)
+            logging.info("Index of {0} set to {1}".format(header, indices[header]))
+
+    for person in contacts["data"]:
+        print("First Name: {0}, Last Name: {1}, Email:{2}, Company: {3}, Act-On score: {4}"
+              .format(person[indices["First Name"]],
+                      person[indices["Last Name"]],
+                      person[indices["E-mail Address"]],
+                      person[indices["Company"]],
+                      person[indices["Act-On score"]]))
+
+
+def get_core_data(session, list_name):
+    if not validate_intention("This prints core contact list data to stdout"):
+        return None
+
+    contacts = test_glbn(session, list_name)
+
+    # Build dict with index of targetted headers
+    target_headers = ["E-mail Address",
+                      "First Name",
+                      "Last Name",
+                      "Company",
+                      "Act-On score"]
+    indices = {}
+    for header in contacts["headers"]:
+        if header in target_headers:
+            indices[header] = contacts["headers"].index(header)
+            logging.info("Index of {0} set to {1}".format(header, indices[header]))
+
+    # Build up return dict core_data
+    core_data = []
+    for person in contacts["data"]:
+        core_data.append([person[indices["E-mail Address"]],
+                         person[indices["First Name"]],
+                         person[indices["Last Name"]],
+                         person[indices["Company"]],
+                         person[indices["Act-On score"]]])
+
+    return core_data
+
+# Sends a plain formatted email with selected core data from a list to an e-mail
+def send_contacts(session, list_name, email_address):
+    pass
+
+# Prints names of lists in account to stdout
+def test_print_lists(session):
+    contactlists = test_getlists(session)
+    for listname in contactlists["result"]:
+        print(listname["name"])
 
 if __name__ == '__main__':
     # Temporary sandbox option exposure
@@ -97,7 +166,10 @@ if __name__ == '__main__':
           "\n\t test_authenticate (takes 'session' in, returns keys)"
           "\n\t test_refresh (takes 'session' in returns keys)"
           "\n\t test_getlists (takes 'session' in, returns dict"
-          "\n\t test_get_list_by_name (takes session and list name in, returns dict"
+          "\n\t test_glbn (takes session and list name in, returns dict)"
+          "\n\t test_get_core_data (takes session and list name, prints to stdout)"
+          "\n\t get_core_data (takes sesison and list name, returns list of lists)"
+          "\n\t test_print_lists (takes session in, prints list names to stdout)"
           "\n\t (Use 'pp.pprint(dict)' to pretty print dicts)")
 
     pp = pprint.PrettyPrinter(indent=2)

@@ -101,6 +101,11 @@ class ActonSession:
             return False
 
     def get_list_id(self, list_name):
+        # Check if token has expired and renew it if required
+        logging.info("Triggering check for token validity...")
+        if not self.token_valid():
+            self.renew_token(self.CLIENT_ID, self.CLIENT_SECRET)
+
         all_lists = self.get_lists()
         for contactlist in all_lists["result"]:
             if contactlist["name"] == list_name:
@@ -111,6 +116,11 @@ class ActonSession:
 
     # Method to get a specific list, identified by its "Name"
     def get_list_by_name(self, list_name, count=1000, start_at=0, **kwargs):
+        # Check if token has expired and renew it if required
+        logging.info("Triggering check for token validity...")
+        if not self.token_valid():
+            self.renew_token(self.CLIENT_ID, self.CLIENT_SECRET)
+
         logging.info('Initiating attempt get list "{0}"...'.format(list_name))
         if not isinstance(list_name, str):
             raise ValueError("get_list_by_name only accepts strings as list names")
