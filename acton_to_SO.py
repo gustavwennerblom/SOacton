@@ -1,5 +1,6 @@
 import logging
 import json
+import pprint
 from requests.exceptions import HTTPError
 from actonsession import ActonSession
 
@@ -47,7 +48,19 @@ def test_refresh(session):
 def test_getlists(session):
     if validate_intention("This returns a dict of contact lists in account."):
         list_dict = session.get_lists()
+        print ("Successful - lists returned (hope you caught it...")
         return list_dict
+    else:
+        return None
+
+def test_get_list_by_name(session, list_name):
+    if validate_intention("This returns a contact list represented as a dict"):
+        try:
+            list_dict = session.get_list_by_name(list_name)
+            return list_dict
+        except ValueError as e:
+            logging.error(repr(e))
+            print('!!!! ' + repr(e))
     else:
         return None
 
@@ -83,7 +96,11 @@ if __name__ == '__main__':
     print("Methods available:"
           "\n\t test_authenticate (takes 'session' in, returns keys)"
           "\n\t test_refresh (takes 'session' in returns keys)"
-          "\n\t test_getlists (takes 'session' in, returns dict")
+          "\n\t test_getlists (takes 'session' in, returns dict"
+          "\n\t test_get_list_by_name (takes session and list name in, returns dict"
+          "\n\t (Use 'pp.pprint(dict)' to pretty print dicts)")
+
+    pp = pprint.PrettyPrinter(indent=2)
 
     # Drop to shell to interact with test methods
     import code

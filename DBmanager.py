@@ -44,7 +44,7 @@ class DBmanager:
     def get_token(self):
         result = self.session.query(ActonKeyRing).all()
         latest_token = result[-1].access_token
-        print("Current token is: {}".format(latest_token))
+        logging.info("Current token {0} retrieved from database".format(latest_token))
         return latest_token
 
     def get_refresh_token(self):

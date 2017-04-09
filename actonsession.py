@@ -13,6 +13,7 @@ class ActonSession:
         wrappedkey = html.escape("<") + key + html.escape(">")
         return wrappedkey
 
+    # Method for initial authentication
     def authenticate(self, username, password, client_id, client_secret):
         path = '/token'
         url = urljoin(self.HOST, path)
@@ -39,6 +40,7 @@ class ActonSession:
         else:
             r.raise_for_status()
 
+    # Method to renew set of tokens
     def renew_token(self, client_id, client_secret):
         path = '/token'
         url = urljoin(self.HOST, path)
@@ -97,6 +99,42 @@ class ActonSession:
             logging.info("Current access key has expired (in use since {0} seconds, max lease time is {1} seconds)."
                          "Suggesting to renew".format(lifetime.seconds, self.LEASE_TIME))
             return False
+
+    def get_list_id(self, list_name):
+        all_lists = self.get_lists()
+        for contactlist in all_lists["result"]:
+            if contactlist["name"] == list_name:
+                logging.info("Found {0}, returning id {1}".format(list_name, contactlist["id"]))
+                return contactlist["id"]
+        logging.warning("No list with name {} found".format(list_name))
+        return None
+
+    # Method to get a specific list, identified by its "Name"
+    def get_list_by_name(self, list_name, count=1000, start_at=0, **kwargs):
+        logging.info('Initiating attempt get list "{0}"...'.format(list_name))
+        if not isinstance(list_name, str):
+            raise ValueError("get_list_by_name only accepts strings as list names")
+
+        # Check that list with the given name exists, else return None
+        list_id = self.get_list_id(list_name)
+        if not list_id:
+            return None
+
+        # Construct query for list
+        path = "/api/1/list/"  + list_id
+        url = urljoin(self.HOST, path)
+        url
+        token = self.db.get_token()
+        auth = 'Bearer ' + token
+        headers = {'Cache-Control': 'no-cache', 'Authorization': auth}
+
+        payload = {"count": count, "offset": start_at}
+        for key in kwargs:
+            payload[key] = kwargs[key]
+
+        response = requests.get(url, headers=headers, params=payload)
+        logging.info("Successfully downloaded {0}".format(list_name))
+        return response.json()
 
     def __init__(self, client_id, client_secret):
         # Define global variables of host, access token and refresh token
