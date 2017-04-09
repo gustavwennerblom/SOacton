@@ -3,7 +3,9 @@ import json
 from requests.exceptions import HTTPError
 from actonsession import ActonSession
 
-
+# Create logging instance
+FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+logging.basicConfig(filename="SOacton.log", format=FORMAT, level=logging.DEBUG)
 
 def validate_intention(message):
     usr_in = input(message + " Continue? (Y/N)")
@@ -14,7 +16,7 @@ def validate_intention(message):
 
 
 def test_authenticate(session):
-
+    logging.info("Attempting to authenticate")
     if validate_intention("This function will return accesskey and refresh key that you might want to save."):
         try:
             access_key, refresh_key = session.authenticate(username, password, CLIENT_ID, CLIENT_SECRET)
@@ -30,6 +32,7 @@ def test_authenticate(session):
 
 
 def test_refresh(session):
+    logging.info("Attempting refresh of access key")
     if validate_intention("This function will return accesskey and refresh key that you might want to save."):
         try:
             access_key, refresh_key = session.renew_token(CLIENT_ID, CLIENT_SECRET)
@@ -48,7 +51,7 @@ def test_getlists(session):
     else:
         return None
 
-def main():
+if __name__ == '__main__':
     # Temporary sandbox option exposure
     usr_in = input("Menu \n"
                    "(1) Work with sandbox\n"
@@ -85,13 +88,4 @@ def main():
     # Drop to shell to interact with test methods
     import code
     code.interact(local=locals())
-
-
-if __name__ == '__main__':
-    # Create logging instance
-    FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(filename="SOacton2.log", level=logging.DEBUG)
-    logging.info("Logger enabled")
-
-    main()
 

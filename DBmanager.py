@@ -1,11 +1,12 @@
+import datetime
 import logging
 import sqlalchemy
 import sqlalchemy.orm
-import datetime
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
-
+FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+logging.basicConfig(filename="SOacton.log", format=FORMAT, level=logging.DEBUG)
 
 class ActonKeyRing(Base):
     __tablename__ = 'actonsession'

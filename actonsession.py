@@ -69,8 +69,8 @@ class ActonSession:
     # response["result"] is a list
     # resonse["result"][0] is a dict with a key "name" holding the name of the list
     def get_lists(self, listing_type="CONTACT_LIST"):
-
         # Check if token has expired and renew it if required
+        logging.info("Triggering check for token validity...")
         if not self.token_valid():
             self.renew_token(self.CLIENT_ID, self.CLIENT_SECRET)
 
@@ -86,9 +86,10 @@ class ActonSession:
         return response.json()
 
     def token_valid(self):
+        logging.info("Checking token validity....")
         current_key_timestamp = self.db.get_key_timestamp()  # returns a datetime object
         lifetime = datetime.datetime.now() - current_key_timestamp
-        if lifetime.seconds > self.LEASE_TIME:
+        if lifetime.seconds < self.LEASE_TIME:
             logging.info("Current access key in use for {0} seconds. Max lease time is {1}. OK to proceed with it"
                          .format(lifetime.seconds, self.LEASE_TIME))
             return True
