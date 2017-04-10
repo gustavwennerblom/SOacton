@@ -1,6 +1,7 @@
 # My adds
 .idea/
 CREDENTIALS.json
+CREDENTIALS_EWS.json
 *.db
 
 # Byte-compiled / optimized / DLL files

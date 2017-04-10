@@ -3,6 +3,7 @@ import json
 import pprint
 from requests.exceptions import HTTPError
 from actonsession import ActonSession
+from mailmanager import EWShandler
 
 # Create logging instance
 FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -22,7 +23,7 @@ def test_authenticate(session):
     if validate_intention("This function will return accesskey and refresh key that you might want to save."):
         try:
             access_key, refresh_key = session.authenticate(username, password, CLIENT_ID, CLIENT_SECRET)
-            logging.info("Successfully authenticated.\n Primary key: {0}, refresh key: {1}".format(access_key, refresh_key))
+            logging.info("Successfully authenticated. Primary key: {0}, refresh key: {1}".format(access_key, refresh_key))
             return access_key, refresh_key
         except HTTPError as e:
             print("Fatal error upon attempt to authenticate")
@@ -94,8 +95,9 @@ def test_get_core_data(session, list_name):
                       person[indices["Act-On score"]]))
 
 
+# Returns a list of lists with certain defined fields
 def get_core_data(session, list_name):
-    if not validate_intention("This prints core contact list data to stdout"):
+    if not validate_intention("This returns a dict with the core data in a given list"):
         return None
 
     contacts = test_glbn(session, list_name)
@@ -123,15 +125,39 @@ def get_core_data(session, list_name):
 
     return core_data
 
-# Sends a plain formatted email with selected core data from a list to an e-mail
-def send_contacts(session, list_name, email_address):
-    pass
 
 # Prints names of lists in account to stdout
 def test_print_lists(session):
     contactlists = test_getlists(session)
     for listname in contactlists["result"]:
         print(listname["name"])
+
+
+# Sends email via EWS, given a specific body text
+def send_mail(body):
+
+    mailman = EWShandler()
+    EWS_session = mailman.authenticate()
+
+    mailman.send_mail(EWS_session, body)
+
+
+# Prepares email on prescribed format and forwards it to send_mail()
+def mail_core_data(session):
+    data = get_core_data(session, "All scored contacts")
+    labels = ["E-mail: ", "Firstname: ", "Lastname: ", "Company: ", "Act-On Score: "]
+    body = "DATA BEGIN\n"
+    delim = "--\n"
+    for record in data:
+        body += delim
+        for i in range(5):
+            fragment = labels[i] + record[i] + "\n"
+            body += fragment
+    body += "--\nDATA END. GOODBYE."
+
+    # Pass on the constructed mail body to the emailer
+    send_mail(body)
+
 
 if __name__ == '__main__':
     # Temporary sandbox option exposure
@@ -172,6 +198,7 @@ if __name__ == '__main__':
           "\n\t test_get_core_data (takes session and list name, prints to stdout)"
           "\n\t get_core_data (takes sesison and list name, returns list of lists)"
           "\n\t test_print_lists (takes session in, prints list names to stdout)"
+          "\n\t send_mail sends a mail with body as specified in argument"
           "\n\t (Use 'pp.pprint(dict)' to pretty print dicts)")
 
     pp = pprint.PrettyPrinter(indent=2)
