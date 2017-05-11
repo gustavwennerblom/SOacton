@@ -1,7 +1,7 @@
 import json
 import logging
 from exchangelib import Account, Credentials, DELEGATE, Message, Mailbox
-
+import smtplib
 
 class EWShandler:
 
@@ -10,7 +10,7 @@ class EWShandler:
         with open("CREDENTIALS_EWS.json") as j:
             text = j.readline()
             d = json.loads(text)
-        self.credentials = Credentials(username=d["UID"], password=d["PWD"])
+        self.credentials = Credentials(username=d["UID2"], password=d["PWD"])   #NOTE: Office365 wants email as username
         logging.info("Successfully authenticated")
 
     # Authentication presuming a file called
